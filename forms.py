@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, TextAreaField
 from wtforms.validators import DataRequired, Email, Length
-
+from models import User
 
 class MessageForm(FlaskForm):
     """Form for adding/editing messages."""
@@ -16,6 +16,23 @@ class UserAddForm(FlaskForm):
     email = StringField('E-mail', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[Length(min=6)])
     image_url = StringField('(Optional) Image URL')
+
+
+class UserEditForm(FlaskForm):
+    """Form for editing user details."""
+
+    # Can't get access to g.user -- is there a way?
+    # def validate_password(form, field):
+    #     """ Validate password """
+    #     if User.authenticate(g.user.username, field.data):
+    #         raise ValidationError("Invalid Password") # Prints error twice, but why?
+
+    username = StringField('Username', validators=[DataRequired()])
+    email = StringField('E-mail', validators=[DataRequired(), Email()])
+    image_url = StringField('(Optional) Image URL')
+    header_image_url = StringField('(Optional) Header Image URL')
+    bio = StringField('(Optional) Bio')
+    password = PasswordField('Password', validators=[DataRequired()])
 
 
 class LoginForm(FlaskForm):
