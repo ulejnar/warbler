@@ -9,7 +9,7 @@ bcrypt = Bcrypt()
 db = SQLAlchemy()
 
 
-class Follows(db.Model):
+class Follows(db.Model): #plural class?
     """Connection of a follower <-> followed_user."""
 
     __tablename__ = 'follows'
@@ -27,7 +27,7 @@ class Follows(db.Model):
     )
 
 
-class Likes(db.Model):
+class Likes(db.Model): #plural class?
     """Mapping user likes to warbles."""
 
     __tablename__ = 'likes' 
@@ -127,7 +127,7 @@ class User(db.Model):
         return len(found_user_list) == 1
 
     def is_following(self, other_user):
-        """Is this user following `other_use`?"""
+        """Is this user following `other_user`?"""
 
         found_user_list = [user for user in self.following if user == other_user]
         return len(found_user_list) == 1

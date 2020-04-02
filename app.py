@@ -254,16 +254,19 @@ def delete_user():
 
 @app.route('/users/<int:user_id>/likes')
 def show_likes(user_id):
+    "Show messages the user_id user has liked"
 
     if g.user:
-        list_liked_msg_ids = [l.id for l in g.user.likes]
+        target_user = User.query.get_or_404(user_id)
+        
+        list_liked_msg_ids = [l.id for l in target_user.likes]
 
         messages = (Message
                     .query
                     .filter(Message.id.in_(list_liked_msg_ids))
                     .order_by(Message.timestamp.desc())
                     .all())
-        return render_template('users/likes.html', messages=messages, user=g.user, likes=list_liked_msg_ids)
+        return render_template('users/likes.html', messages=messages, user=target_user, likes=list_liked_msg_ids)
 
     else:
         flash("Access unauthorized.", "danger")
@@ -321,16 +324,27 @@ def messages_destroy(message_id):
 @app.route('/messages/<int:msg_id>/like', methods=["POST"])
 def like_user(msg_id):
 
-    list_liked_msg_ids = [l.id for l in g.user.likes]
-    if msg_id in list_liked_msg_ids:
-        like = Likes.query.filter(Likes.user_id == g.user.id, Likes.message_id == msg_id).first()
-        db.session.delete(like)
-        db.session.commit()
-    else:
-        likes = Likes(user_id=g.user.id, message_id=msg_id)
-        db.session.add(likes)
-        db.session.commit()
-    return redirect("/")
+    if not g.user: 
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    if msg_id not in [m.id for m in g.user.messages]:
+        list_liked_msg_ids = [l.id for l in g.user.likes]
+        if msg_id in list_liked_msg_ids:
+            like = Likes.query.filter(Likes.user_id == g.user.id, Likes.message_id == msg_id).first()
+            db.session.delete(like)
+            db.session.commit()
+        else:
+            likes = Likes(user_id=g.user.id, message_id=msg_id)
+            db.session.add(likes)
+            db.session.commit()
+        return redirect(request.referrer)
+
+    else:  # No allowing user to like their own message
+        flash("Sorry, you can't like your own messages.", "warning")
+        return redirect(request.referrer)
+        
+       
 
 ##############################################################################
 # Homepage and error pages
