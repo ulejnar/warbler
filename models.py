@@ -34,6 +34,7 @@ class Likes(db.Model):
 
     id = db.Column(
         db.Integer,
+        autoincrement=True,
         primary_key=True
     )
 
@@ -114,6 +115,7 @@ class User(db.Model):
         'Message',
         secondary="likes"
     )
+    
 
     def __repr__(self):
         return f"<User #{self.id}: {self.username}, {self.email}>"

@@ -33,6 +33,12 @@
                 <a href="/users/{{ g.user.id }}/followers">{{ g.user.followers | length }}</a>
               </h4>
             </li>
+            <li class="stat">
+              <p class="small">Likes</p>
+              <h4>
+                <a href="/users/{{ g.user.id }}/likes">{{ g.user.likes | length }}</a>
+              </h4>
+            </li>
           </ul>
         </div>
       </div>
@@ -51,15 +57,20 @@
               <span class="text-muted">{{ msg.timestamp.strftime('%d %B %Y') }}</span>
               <p>{{ msg.text }}</p>
             </div>
+            {% if msg.user_id != user.id %}
             <form method="POST" action="/messages/{{ msg.id }}/like" class="messages-like">
               <button class="
                 btn 
                 btn-sm 
                 {{'btn-primary' if msg.id in likes else 'btn-secondary'}}"
               >
-                <i class="fa fa-thumbs-up"></i> 
+              <i class="fa fa-thumbs-up"></i> 
               </button>
+              {% if msg.id in likes %}
+                <i class="fa fa-star"></i>
+              {% endif %}
             </form>
+            {% endif %}
           </li>
         {% endfor %}
       </ul>
