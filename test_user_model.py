@@ -7,8 +7,9 @@
 
 import os
 from unittest import TestCase
-
+from flask_bcrypt import Bcrypt
 from models import db, User, Message, Follows
+bcrypt = Bcrypt()
 
 # BEFORE we import our app, let's set an environmental variable
 # to use a different database for tests (we need to do this
@@ -40,8 +41,8 @@ class UserModelTestCase(TestCase):
         Follows.query.delete()
 
         #Test hashing?
-        #USER1_PWD = bcrypt.generate_password_hash("test").decode('UTF-8')
-        #USER2_PWD = bcrypt.generate_password_hash("secret").decode('UTF-8')
+        USER1_PWD = bcrypt.generate_password_hash("test").decode('UTF-8')
+        USER2_PWD = bcrypt.generate_password_hash("secret").decode('UTF-8')
 
         test_user1 = User(username="TEST_USER1", 
                           email="TEST1@EMAIL.COM", 
@@ -49,7 +50,7 @@ class UserModelTestCase(TestCase):
                           header_image_url="TEST1_HEADER_IMAGE",
                           bio="TEST1 BIO",
                           location="TEST1 LOCATION",
-                          password="TEST2_PWD")
+                          password=USER1_PWD)
         
         test_user2 = User(username="TEST_USER2", 
                           email="TEST2@EMAIL.COM", 
@@ -57,7 +58,7 @@ class UserModelTestCase(TestCase):
                           header_image_url="TEST2_HEADER_IMAGE",
                           bio="TEST2 BIO",
                           location="TEST2 LOCATION",
-                          password="TEST2_PWD")
+                          password=USER2_PWD)
 
         db.session.add(test_user1)
         db.session.add(test_user2)
@@ -100,3 +101,50 @@ class UserModelTestCase(TestCase):
 
         self.assertEqual(user2.is_following(user1), True)
         self.assertEqual(user1.is_following(user2), False)
+
+    def test_is_followed_by(self):
+        """Does is followed by detects when a user is followed by another user and when a user is not followed by another user"""
+
+        user1 = User.query.filter(User.username == "TEST_USER1").first()
+        user2 = User.query.filter(User.username == "TEST_USER2").first()
+
+        test_follow = Follows(user_being_followed_id=user1.id,
+                              user_following_id=user2.id)
+        
+        db.session.add(test_follow)
+        db.session.commit()
+
+        self.assertEqual(user1.is_followed_by(user2), True)
+        self.assertEqual(user2.is_followed_by(user1), False)
+
+    def test_user_authenticate(self):
+        """Does authneticate return a user object when given a valid username and password and return Flase when giving a wrong password or username"""
+
+        user1 = User.query.filter(User.username == "TEST_USER1").first()
+
+        self.assertEqual(User.authenticate(user1.username, "test"), user1)
+        self.assertEqual(User.authenticate(user1.username, "xxxx"), False)
+        self.assertEqual(User.authenticate("userX", "test"), False)
+
+    def test_signup(self):
+        """does sign up successfully crates a new user given valid credentials"""
+
+        user_new = User.signup("BHill", "bhill@gmail.com", "password", "www.xsd.com")
+        # db.session.add(user_new)
+        db.session.commit()
+
+        print("user object print:", User.query.filter(User.username == "BHill").first())
+        
+
+        # def signup(cls, username, email, password, image_url)
+
+
+
+
+    
+
+
+
+
+
+
