@@ -103,6 +103,15 @@ class UserViewsTestCase(TestCase):
             response = client.get(f'/users/{self.user_id}/following')
             
             self.assertEqual(response.status_code, 200)
+
+
+    def test_redirect_following(self):
+        "Does GET /users/<user-id>/following with no user.id in the session redirects us to the homepage so we can't access the list of following users?"
+        with app.test_client()as client:
+            response = client.get(f'/users/{self.user_id}/following')
+            self.assertEqual(response.status_code, 302)
+            self.assertEqual(response.location, "http://localhost/")
+
     
 
     def test_show_followers(self):

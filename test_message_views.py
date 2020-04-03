@@ -51,6 +51,11 @@ class MessageViewTestCase(TestCase):
 
         db.session.commit()
 
+        self.testmessage = Message(text="This is a message",
+                                   user_id=self.testuser.id)
+        db.session.add(self.testmessage)
+        db.session.commit()
+
     def test_add_message(self):
         """Can use add a message?"""
 
@@ -58,6 +63,9 @@ class MessageViewTestCase(TestCase):
         # we need to use the changing-session trick:
 
         with self.client as c:
+            db.session.query(Message).delete()
+            db.session.commit()
+
             with c.session_transaction() as sess:
                 sess[CURR_USER_KEY] = self.testuser.id
 
@@ -71,3 +79,20 @@ class MessageViewTestCase(TestCase):
 
             msg = Message.query.one()
             self.assertEqual(msg.text, "Hello")
+            self.assertEqual(msg.user_id, self.testuser.id)
+
+    def test_delete_message(self):
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.testuser.id
+                targetmessage = Message.query.get(self.testmessage.id)
+
+            resp = c.post(f"/messages/{targetmessage.id}/delete")
+
+            self.assertEqual(resp.status_code, 302)
+            self.assertEqual(Message.query.first(), None)
+            
+
+
+
+
